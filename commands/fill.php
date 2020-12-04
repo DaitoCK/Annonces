@@ -16,13 +16,13 @@ $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
 $posts = [];
 $categories = [];
 
-for ($i = 0; $i < 50; $i++) {
+for ($i = 0; $i < 25; $i++) {
     $pdo->exec("INSERT INTO post SET name='{$faker->sentence()}', slug='{$faker->slug}', create_at='{$faker->date} {$faker->time}', content='{$faker->paragraphs(rand(3,15), true)}'");
     $posts[] = $pdo->lastInsertId();
 }
 
 
-for ($i = 0; $i < 5; $i++) {
+for ($i = 0; $i < 3; $i++) {
     $pdo->exec("INSERT INTO category SET name='{$faker->sentence(3)}', slug='{$faker->slug}'");
     $categories[] = $pdo->lastInsertId();
 }
