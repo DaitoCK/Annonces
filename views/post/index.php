@@ -3,7 +3,7 @@ use App\Connection;
 use App\Table\PostTable;
 
 
-$title = 'Mon projet';
+$title = 'Mes petites annonces';
 
 $pdo = Connection::getPDO();
 
@@ -13,7 +13,7 @@ $table = new PostTable($pdo);
 $link = $router->url('home');
 ?>
 
-<h1 >Mon projet</h1>
+<h1 >Mes petites annonces</h1>
 
 <div class="row">
     <?php foreach ($posts as $post): ?>
