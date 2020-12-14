@@ -13,7 +13,7 @@ $table = new PostTable($pdo);
 $link = $router->url('home');
 ?>
 
-<h1 >Mes petites annonces</h1>
+<h1 >Nos bonnes affaires</h1>
 
 <div class="row">
     <?php foreach ($posts as $post): ?>

@@ -1,9 +1,17 @@
 <?php
 namespace App;
 
-class Auth {
+use App\Security\ForbiddenException;
 
-    public static function check () {
-        // TODO : Ecrire le code //
+class Auth{
+
+    public function check() {
+        if (session_status() === PHP_SESSION_NONE){
+            session_start();
+        }
+        if (!isset($_SESSION['auth'])) {
+            throw new ForbiddenException();
+        }
     }
+
 }

@@ -1,6 +1,8 @@
 <?php
 namespace App;
 
+use App\Security\ForbiddenException;
+
 class Router {
 
     /***---Variable type chaine de caractère(string)***/
@@ -8,6 +10,8 @@ class Router {
 
     /**----Variable qui est de type AltoRouter**/
     private $router;
+
+    public $layout = "layouts/default";
 
     public function __construct(string $viewPath)
     {
@@ -45,12 +49,17 @@ class Router {
         $view = $match['target'];
         $params = $match['params'];
         $router = $this;
-        ob_start();
-        require $this->viewPath . DIRECTORY_SEPARATOR . $view . '.php';
-
-        $content =ob_get_clean();
-        require $this->viewPath . DIRECTORY_SEPARATOR . 'layouts/default.php';
-
+        $isAdmin = strpos($view, 'admin/') !== false;
+        $layout = $isAdmin ? 'admin/layouts/default' : 'layouts/default';
+        try {
+            ob_start();
+            require $this->viewPath . DIRECTORY_SEPARATOR . $view . '.php';
+            $content = ob_get_clean();
+            require $this->viewPath . DIRECTORY_SEPARATOR . $layout . '.php';
+        } catch (ForbiddenException $e) {
+            header ('Location: ' . $this->url('login') . '?forbidden=1');
+            exit();
+        }
         return $this;
     }
 }

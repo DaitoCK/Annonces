@@ -1,12 +1,12 @@
 <?php
-    namespace App\Table\Exception;
+namespace App\Table\Exception;
 
 
 use Throwable;
 
-    class NotFoundException extends \Exception {
+class NotFoundException extends \Exception {
 
-        public function __construct(string $table, int $id)
+    public function __construct(string $table,  $id)
     {
         $this->message = "Aucun enregistrement ne correspond a cette ID #$id dans la table '$table'";
     }

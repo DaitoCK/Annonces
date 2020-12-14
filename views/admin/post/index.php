@@ -5,6 +5,7 @@ use App\Auth;
 
 Auth::check();
 
+$router->layout = 'admin/layouts/default';
 $title= "Administration";
 $pdo = Connection::getPDO();
 $link = $router->url('admin_posts');
@@ -13,7 +14,7 @@ $link = $router->url('admin_posts');
 
 <?php if (isset($_GET['delete'])): ?>
 <div class="alert alert-sucess">
-    L'enregistremenbt a bien été supprimé
+    L'article a bien été supprimé
 </div>
 <?php endif ?>
 
@@ -21,7 +22,9 @@ $link = $router->url('admin_posts');
     <thead>
         <th>#</th>
         <th>Titre</th>
-        <th>Actions</th>
+        <th>
+            <a href="<?= $router->url('admin_post_new') ?>"class="btn btn-primary">Nouveau</a>
+        </th>
     </thead>
     <tbody>
     <?php foreach($posts as $post): ?>

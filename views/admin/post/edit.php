@@ -1,35 +1,48 @@
 <?php
 use App\Connection;
 use App\Table\PostTable;
-use App\Model\Post;
+use App\Table\CategoryTable;
+use App\HTML\Form;
+use App\Validators\PostValidator;
+use App\ObjectHelper;
 
 $pdo = Connection::getPDO();
 $postTable = new PostTable($pdo);
+$categoryTable = new CategoryTable($pdo);
+$categories = $categoryTable->list();
 $post = $postTable->find($params['id']);
+$categoryTable->hydratePosts([$post]);
 $success = false;
 
 $errors = [];
 
 
 if (!empty($_POST)) {
-    if (empty($_POST['name'])) {
-        $errors ['name'][] = 'Le champs titre ne peut pas etre vide';
-    }
-    if (mb_strlen($_POST['name']) <= 3) {
-
-        $errors ['name'][] = 'Le champs titre doit contenir plus de 3 caractères';
-    }
-    $post->setName($_POST['name']);
-    if (empty($errors)) {
-        $postTable->update($post);
+    $v = new PostValidator($_POST, $postTable, $post->getID(), $categories);
+    ObjectHelper::hydrate($post, $_POST, ['name', 'content','slug','create_at']);
+    if ($v->validate()) {
+        $pdo->beginTransaction();
+        $postTable->updatePost($post);
+        $postTable->attachCategories($post->getID(), $_POST['categories_ids']);
+        $pdo->commit();
+        $categoryTable->hydratePosts([$post]);
         $success = true;
+    } else {
+        $errors = $v->errors();
     }
 }
+$form = new Form($post, $errors);
 ?>
 
 <?php if ($success): ?>
     <div class="alert alert-success">
         L'article a bien été modifié
+    </div>
+<?php endif ?>
+
+<?php if (isset($_GET['created'])): ?>
+    <div class="alert alert-success">
+        L'article a bien été créer
     </div>
 <?php endif ?>
 
@@ -41,15 +54,4 @@ if (!empty($_POST)) {
 
 <h1>Editer l'article <?= e($post->getName())?></h1>
 
-<form action="" method="POST">
-    <div class="Form-group">
-        <label for="name">Titre</label>
-        <input type="text" class="form-control <?= isset($errors['name']) ? 'is-invalid' : '' ?>" name="name" value="<?= e($post->getName())?>">
-        <?php if (isset($errors['name'])): ?>
-        <div class="invalid-feedback">
-            <?= implode('<br>', $errors['name']) ?>
-        </div>
-        <?php endif ?>
-    </div>
-    <button class="btn btn-primary">Modifier</button>
-</form>
+<?php require('_form.php') ?>

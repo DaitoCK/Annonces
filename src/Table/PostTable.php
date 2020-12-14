@@ -5,34 +5,44 @@ use App\PaginatedQuery;
 use App\Model\Post;
 
 
-final class PostTable extends TableParent {
+final class PostTable extends Table {
 
     // Je rappelle mes valeurs protégé de la table Parent.
     protected $table = "post";
     protected $class = Post::class;
 
 
-    public function update(Post $post): void
+    public function updatePost (Post $post): void
     {
-        $query = $this->pdo->prepare("UPDATE {$this->table} SET name =  :name WHERE id = :id");
-        $ok = $query->execute([
-            'id' => $post->getID(),
+
+        $this->update([
             'name' => $post->getName(),
-
-        ]);
-        if($ok === false){
-            throw new \Exception("Impossible de supprimer l'enregistrement $id dans la table {$this->table}");
-        }
+            'slug' => $post->getSlug(),
+            'content' => $post->getContent(),
+            'create_at' => $post->getCreateAt()->format('Y-m-d H:i:s')
+        ], $post->getID());
     }
 
-    public function delete (int $id): void
+    public function createPost (Post $post): void
     {
-        $query = $this->pdo->prepare("DELETE FROM {$this->table} WHERE id = ?");
-        $ok = $query->execute([$id]);
-        if($ok === false){
-            throw new \Exception("Impossible de supprimer l'enregistrement $id dans la table {$this->table}");
+        $id = $this->create([
+            'name' => $post->getName(),
+            'slug' => $post->getSlug(),
+            'content' => $post->getContent(),
+            'create_at' => $post->getCreateAt()->format('Y-m-d H:i:s')
+        ]);
+        $post->setID($id);
+    }
+
+    public function attachCategories (int $id, array $categories) {
+        $this->pdo->exec('DELETE FROM post_category WHERE post_id = ' . $id);
+        $query = $this->pdo->prepare('INSERT INTO post_category SET post_id = ?, category_id = ?');
+        foreach($categories as $category){
+            $query->execute([$id, $category]);
         }
     }
+
+
 
     /* Pour mettre en place la pagination si dessous. Il va falloir calculer les variables suivantes :
               - Le nombre total d'articles (une requête SQL avec un COUNT(id)).
